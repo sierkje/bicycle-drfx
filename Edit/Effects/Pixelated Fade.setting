@@ -1,0 +1,127 @@
+{
+	Tools = ordered() {
+		PixelatedFade = MacroOperator {
+			CtrlWZoom = false,
+			NameSet = true,
+			Inputs = ordered() {
+				Input1 = InstanceInput {
+					SourceOp = "Dissolve_Pixelate",
+					Source = "Foreground",
+				}
+			},
+			Outputs = {
+				Output1 = InstanceOutput {
+					SourceOp = "Dissolve_Pixelate",
+					Source = "Output",
+				}
+			},
+			ViewInfo = GroupInfo {
+				Pos = { -55, 115.5 },
+				Flags = {
+					AllowPan = false,
+					GridSnap = true,
+					ConnectedSnap = true,
+					AutoSnap = true,
+					RemoveRouters = true
+				},
+				Size = { 274.001, 165.364, 63, 24.2424 },
+				Direction = "Horizontal",
+				PipeStyle = "Direct",
+				Scale = 1,
+				Offset = { -330, 25.1364 }
+			},
+			Tools = ordered() {
+				Background_EmptyCanvas = Background {
+					CtrlWShown = false,
+					NameSet = true,
+					Inputs = {
+						GlobalOut = Input { Value = 303, },
+						Width = Input { Value = 1920, },
+						Height = Input { Value = 1080, },
+						UseFrameFormatSettings = Input { Value = 1, },
+						["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+						TopLeftAlpha = Input { Value = 0, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 330, 82.5 } },
+				},
+				Dissolve_Pixelate = Dissolve {
+					Transitions = {
+						[0] = "DFTLumaRamp"
+					},
+					NameSet = true,
+					Inputs = {
+						Operation = Input { Value = FuID { "DFTLumaRamp" }, },
+						Mix = Input {
+							Value = 0.166666666666667,
+							Expression = "iif(time<PixelatedFade.FadeIn,time/PixelatedFade.FadeIn,iif(comp.RenderEnd<time+PixelatedFade.FadeOut,(comp.RenderEnd-time)/PixelatedFade.FadeOut,1))",
+						},
+						Background = Input {
+							SourceOp = "Background_EmptyCanvas",
+							Source = "Output",
+						},
+						Map = Input {
+							SourceOp = "MosaicBlur_PixelateNoise",
+							Source = "Output",
+						},
+						["DFTLumaRamp.Softness"] = Input { Value = 0, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 330, 49.5 } },
+				},
+				MosaicBlur_PixelateNoise = ofx.com.blackmagicdesign.resolvefx.MosaicBlur {
+					CtrlWShown = false,
+					NameSet = true,
+					Inputs = {
+						Source = Input {
+							SourceOp = "FastNoise_PrePixelated",
+							Source = "Output",
+						},
+						PixelFrequency = Input { Value = 96, },
+						SmoothStrength = Input { Value = 0, },
+						cellShape = Input { Value = FuID { "CellShapeSquare" }, },
+						aliasing = Input { Value = 0, },
+						advancedControlsGroup = Input { Value = 0, },
+						xOffset = Input { Value = 0, },
+						yOffset = Input { Value = 0, },
+						aspect = Input { Value = 1, },
+						BorderType = Input { Value = FuID { "BORDER_TYPE_REFLECT" }, },
+						isAntiAlias = Input { Value = 0, },
+						isBinarizeAlpha = Input { Value = 0, },
+						isLegacyMethod = Input { Value = 0, },
+						BlendAmount = Input { Value = 0, },
+						blendGroup = Input { Value = 0, },
+						blendIn = Input { Value = 1, },
+						blend = Input { Value = 0, },
+						ignoreContentShape = Input { Value = 0, },
+						legacyIsProcessRGBOnly = Input { Value = 0, },
+						refreshTrigger = Input { Value = 1, },
+						resolvefxVersion = Input { Value = "3.0", },
+					},
+					ViewInfo = OperatorInfo { Pos = { 330, 16.5 } },
+				},
+				FastNoise_PrePixelated = FastNoise {
+					CtrlWShown = false,
+					NameSet = true,
+					Inputs = {
+						GlobalOut = Input { Value = 303, },
+						Width = Input { Value = 1920, },
+						Height = Input { Value = 1080, },
+						UseFrameFormatSettings = Input { Value = 1, },
+						["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+						Detail = Input { Value = 10, },
+						Contrast = Input { Value = 5, },
+						XScale = Input { Value = 20, },
+						Color1Red = Input { Value = 0.2, },
+						Color1Green = Input { Value = 0.2, },
+						Color1Blue = Input { Value = 0.2, },
+						Color1Alpha = Input { Value = 1, },
+						Color2Red = Input { Value = 0.6, },
+						Color2Green = Input { Value = 0.6, },
+						Color2Blue = Input { Value = 0.6, },
+					},
+					ViewInfo = OperatorInfo { Pos = { 330, -16.5 } },
+				}
+			},
+			UserControls = ordered() { FadeIn = { INP_Integer = true, LINKID_DataType = "Number", LINKS_Name = "Frames In", INPID_InputControl = "SliderControl", ICS_ControlPage = "Controls", INP_Default = 24, }, FadeOut = { INP_Integer = true, LINKID_DataType = "Number", LINKS_Name = "Out", INPID_InputControl = "SliderControl", ICS_ControlPage = "Controls", INP_Default = 24, } }
+		}
+	}
+}
