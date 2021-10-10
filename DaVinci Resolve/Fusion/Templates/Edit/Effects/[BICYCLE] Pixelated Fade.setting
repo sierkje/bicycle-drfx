@@ -1,17 +1,15 @@
 {
 	Tools = ordered() {
-		PixelatedFade = MacroOperator {
-			CtrlWZoom = false,
-			NameSet = true,
+		BICYCLE_PixelatedFade = MacroOperator {
 			Inputs = ordered() {
-				Input1 = InstanceInput {
-					SourceOp = "Dissolve_Pixelate",
+				MainInput1 = InstanceInput {
+					SourceOp = "PixelatedFade",
 					Source = "Foreground",
 				}
 			},
 			Outputs = {
-				Output1 = InstanceOutput {
-					SourceOp = "Dissolve_Pixelate",
+				MainOutput1 = InstanceOutput {
+					SourceOp = "PixelatedFade",
 					Source = "Output",
 				}
 			},
@@ -31,51 +29,42 @@
 				Offset = { -330, 25.1364 }
 			},
 			Tools = ordered() {
-				Background_EmptyCanvas = Background {
-					CtrlWShown = false,
-					NameSet = true,
+				_blankBackground = Background {
 					Inputs = {
-						GlobalOut = Input { Value = 303, },
-						Width = Input { Value = 1920, },
-						Height = Input { Value = 1080, },
 						UseFrameFormatSettings = Input { Value = 1, },
-						["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
 						TopLeftAlpha = Input { Value = 0, },
 					},
 					ViewInfo = OperatorInfo { Pos = { 330, 82.5 } },
 				},
-				Dissolve_Pixelate = Dissolve {
+				PixelatedFade = Dissolve {
 					Transitions = {
 						[0] = "DFTLumaRamp"
 					},
-					NameSet = true,
 					Inputs = {
 						Operation = Input { Value = FuID { "DFTLumaRamp" }, },
 						Mix = Input {
 							Value = 0.166666666666667,
-							Expression = "iif(time<PixelatedFade.FadeIn,time/PixelatedFade.FadeIn,iif(comp.RenderEnd<time+PixelatedFade.FadeOut,(comp.RenderEnd-time)/PixelatedFade.FadeOut,1))",
+							Expression = "iif(time<BICYCLE_PixelatedFade.In,time/BICYCLE_PixelatedFade.In,iif(comp.RenderEnd<time+BICYCLE_PixelatedFade.Out,(comp.RenderEnd-time)/BICYCLE_PixelatedFade.Out,1))",
 						},
 						Background = Input {
-							SourceOp = "Background_EmptyCanvas",
+							SourceOp = "_blankBackground",
 							Source = "Output",
 						},
 						Map = Input {
-							SourceOp = "MosaicBlur_PixelateNoise",
+							SourceOp = "_pixelateNoise",
 							Source = "Output",
 						},
 						["DFTLumaRamp.Softness"] = Input { Value = 0, },
 					},
 					ViewInfo = OperatorInfo { Pos = { 330, 49.5 } },
 				},
-				MosaicBlur_PixelateNoise = ofx.com.blackmagicdesign.resolvefx.MosaicBlur {
-					CtrlWShown = false,
-					NameSet = true,
+				_pixelateNoise = ofx.com.blackmagicdesign.resolvefx.MosaicBlur {
 					Inputs = {
 						Source = Input {
-							SourceOp = "FastNoise_PrePixelated",
+							SourceOp = "_generateNoise",
 							Source = "Output",
 						},
-						PixelFrequency = Input { Value = 96, },
+						PixelFrequency = Input { Expression = "comp:GetPrefs(\"Comp.FrameFormat.Height\")/11.25", },
 						SmoothStrength = Input { Value = 0, },
 						cellShape = Input { Value = FuID { "CellShapeSquare" }, },
 						aliasing = Input { Value = 0, },
@@ -98,18 +87,13 @@
 					},
 					ViewInfo = OperatorInfo { Pos = { 330, 16.5 } },
 				},
-				FastNoise_PrePixelated = FastNoise {
-					CtrlWShown = false,
-					NameSet = true,
+				_generateNoise = FastNoise {
 					Inputs = {
-						GlobalOut = Input { Value = 303, },
-						Width = Input { Value = 1920, },
-						Height = Input { Value = 1080, },
 						UseFrameFormatSettings = Input { Value = 1, },
-						["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-						Detail = Input { Value = 10, },
-						Contrast = Input { Value = 5, },
-						XScale = Input { Value = 20, },
+						Detail = Input { Expression = "BICYCLE_PixelatedFade.Detail", },
+						Contrast = Input { Expression = "BICYCLE_PixelatedFade.Detail/4", },
+						Brightness = Input { Value = 0, },
+						XScale = Input { Expression = "BICYCLE_PixelatedFade.Detail*2", },
 						Color1Red = Input { Value = 0.2, },
 						Color1Green = Input { Value = 0.2, },
 						Color1Blue = Input { Value = 0.2, },
@@ -121,7 +105,42 @@
 					ViewInfo = OperatorInfo { Pos = { 330, -16.5 } },
 				}
 			},
-			UserControls = ordered() { FadeIn = { INP_Integer = true, LINKID_DataType = "Number", LINKS_Name = "Frames In", INPID_InputControl = "SliderControl", ICS_ControlPage = "Controls", INP_Default = 24, }, FadeOut = { INP_Integer = true, LINKID_DataType = "Number", LINKS_Name = "Out", INPID_InputControl = "SliderControl", ICS_ControlPage = "Controls", INP_Default = 24, } }
+			UserControls = ordered() {
+				In = {
+					INP_Integer = true,
+					LINKID_DataType = "Number",
+					LINKS_Name = "Frames In",
+					INPID_InputControl = "SliderControl",
+					ICS_ControlPage = "Controls",
+					INP_Default = 24,
+					INP_MinScale = 0,
+					INP_MaxScale = 60,
+					INP_MinAllowed = 0,
+				},
+				Out = {
+					INP_Integer = true,
+					LINKID_DataType = "Number",
+					LINKS_Name = "Frames Out",
+					INPID_InputControl = "SliderControl",
+					ICS_ControlPage = "Controls",
+					INP_Default = 24,
+					INP_MinScale = 0,
+					INP_MaxScale = 60,
+					INP_MinAllowed = 0,
+				},
+				Detail = {
+					INP_Integer = false,
+					LINKID_DataType = "Number",
+					LINKS_Name = "Strength",
+					INPID_InputControl = "SliderControl",
+					ICS_ControlPage = "Controls",
+					INP_Default = 10,
+					INP_MinScale = 0,
+					INP_MaxScale = 20,
+					INP_MinAllowed = 0,
+					INP_MaxAllowed = 20,
+				},
+			},
 		}
 	}
 }
