@@ -42,10 +42,7 @@
 					},
 					Inputs = {
 						Operation = Input { Value = FuID { "DFTLumaRamp" }, },
-						Mix = Input {
-							Value = 0.166666666666667,
-							Expression = "iif(time < (BICYCLE_PixelatedFade.In + comp.RenderStart), iif(BICYCLE_PixelatedFade.In > 0, (time - comp.RenderStart) / BICYCLE_PixelatedFade.In, 1), iff(BICYCLE_PixelatedFade.Out > 0, iff(time > (comp.RenderEnd - BICYCLE_PixelatedFade.Out), (comp.RenderEnd-time)/BICYCLE_PixelatedFade.Out, 1), 1))",
-						},
+						Mix = Input { Expression = "iif(time<(BICYCLE_PixelatedFade.In+comp.RenderStart),iif(BICYCLE_PixelatedFade.In>0,(time-comp.RenderStart)/BICYCLE_PixelatedFade.In,1),iif(BICYCLE_PixelatedFade.Out>0,iif(time>(comp.RenderEnd-BICYCLE_PixelatedFade.Out),(comp.RenderEnd-time)/BICYCLE_PixelatedFade.Out,1),1))", },
 						Background = Input {
 							SourceOp = "_blankBackground",
 							Source = "Output",
